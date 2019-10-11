@@ -1,40 +1,60 @@
 use std::io::{self, Read, Result, Error};
+use std::fs::File;
 
-trait InputReader {
-  // implementations
-  fn peek(&self) -> char;
-  fn consume(&mut self) -> Result<()>;
-  fn str_buf(&mut self) -> &mut String;
+pub struct InputReader {
+  reader: Box<dyn Read>,
+  buf: Vec<u8>,
+  bytes_read: usize,
+  current_index: usize,
+  str_buf: String,
+}
 
-  // defaults
-  fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) -> Result<()> {
-    while !test(self.peek()) { self.consume()?; }
-    Ok(())
+impl InputReader {
+  pub fn new() -> Result<InputReader> {
+    let reader = Box::new(io::stdin());
+    InputReader::from_reader(reader)
   }
 
-  fn next_word(&mut self) -> Result<String> {
+  pub fn from_file(path: &str) -> Result<InputReader> {
+    let reader = Box::new(File::open(path)?);
+    InputReader::from_reader(reader)
+  }
+
+  pub fn from_reader(reader: Box<dyn Read>) -> Result<InputReader> {
+    let mut input = InputReader {
+      reader,
+      buf: vec![0; 1 << 16],
+      bytes_read: 0,
+      current_index: 0,
+      str_buf: String::with_capacity(1 << 8),
+    };
+    input.ensure_buffer()?;
+    Ok(input)
+  }
+
+  pub fn set_buf_size(&mut self, buf_size: usize) { self.buf.resize(buf_size, 0); }
+
+  pub fn next_word(&mut self) -> Result<String> {
     self.consume_until(|c| c.is_ascii_graphic())?;
 
-    self.str_buf().clear();
+    self.str_buf.clear();
     while self.peek().is_ascii_graphic() {
-      let c = self.peek();
-      self.str_buf().push(c);
+      self.str_buf.push(self.peek());
       self.consume()?;
     }
-    Ok(self.str_buf().clone())
+    Ok(self.str_buf.clone())
   }
 
-  fn next_line(&mut self) -> Result<String> {
-    self.str_buf().clear();
+  pub fn next_line(&mut self) -> Result<String> {
+    self.str_buf.clear();
     while self.peek() != '\n' {
-      let c = self.peek();
-      self.str_buf().push(c);
+      self.str_buf.push(self.peek());
       self.consume()?;
     }
-    Ok(self.str_buf().clone())
+    Ok(self.str_buf.clone())
   }
 
-  fn next_usize(&mut self) -> Result<usize> {
+  pub fn next_usize(&mut self) -> Result<usize> {
     self.consume_until(|c| c.is_ascii_digit())?;
 
     let mut num = 0;
@@ -46,7 +66,7 @@ trait InputReader {
     Ok(num)
   }
 
-  fn next_i64(&mut self) -> Result<i64> {
+  pub fn next_i64(&mut self) -> Result<i64> {
     let mut sign = 1;
     loop {
       self.consume_until(|c| c.is_ascii_digit() || c == '-')?;
@@ -62,51 +82,29 @@ trait InputReader {
     Ok(self.next_usize()? as i64 * sign)
   }
 
-  fn next_f64(&mut self) -> Result<f64> {
+  pub fn next_f64(&mut self) -> Result<f64> {
     self.consume_until(|c| c.is_ascii_digit() || c == '-')?;
     Ok(self.next_word()?.parse().unwrap())
   }
 
-  fn next_u32(&mut self) -> Result<u32> { Ok(self.next_usize()? as u32) }
-  fn next_u64(&mut self) -> Result<u64> { Ok(self.next_usize()? as u64) }
-  fn next_i32(&mut self) -> Result<i32> { Ok(self.next_i64()?   as i32) }
-  fn next_f32(&mut self) -> Result<f32> { Ok(self.next_f64()?   as f32) }
+  pub fn next_u32(&mut self) -> Result<u32> { Ok(self.next_usize()? as u32) }
+  pub fn next_u64(&mut self) -> Result<u64> { Ok(self.next_usize()? as u64) }
+  pub fn next_i32(&mut self) -> Result<i32> { Ok(self.next_i64()?   as i32) }
+  pub fn next_f32(&mut self) -> Result<f32> { Ok(self.next_f64()?   as f32) }
 }
 
-pub struct StdinReader {
-  buf: Vec<u8>,
-  bytes_read: usize,
-  current_index: usize,
-  str_buf: String,
-}
-
-impl StdinReader {
-  pub fn new() -> Result<StdinReader> { StdinReader::with_buf_size(1 << 16) }
-
-  pub fn with_buf_size(buf_size: usize) -> Result<StdinReader> {
-    let mut input = StdinReader {
-      buf: vec![0; buf_size],
-      bytes_read: 0,
-      current_index: 0,
-      str_buf: String::with_capacity(1 << 8),
-    };
-    input.ensure_buffer()?;
-    Ok(input)
-  }
-
+impl InputReader {
   fn ensure_buffer(&mut self) -> Result<()> {
     if self.current_index == self.bytes_read {
       self.current_index = 0;
-      self.bytes_read = io::stdin().read(&mut self.buf[..])?;
+      self.bytes_read = self.reader.read(&mut self.buf[..])?;
       if self.bytes_read == 0 {
         return Err(Error::new(io::ErrorKind::Other, "InputReader: Could not read more bytes"));
       }
     }
     Ok(())
   }
-}
 
-impl InputReader for StdinReader {
   fn peek(&self) -> char { self.buf[self.current_index] as char }
 
   fn consume(&mut self) -> Result<()> {
@@ -114,11 +112,14 @@ impl InputReader for StdinReader {
     self.ensure_buffer()
   }
 
-  fn str_buf(&mut self) -> &mut String { &mut self.str_buf }
+  fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) -> Result<()> {
+    while !test(self.peek()) { self.consume()?; }
+    Ok(())
+  }
 }
 
 fn main() -> Result<()> {
-  let mut input = StdinReader::new()?;
-  println!("{}\n{}\n{}", input.next_u32()?, input.next_word()?, input.next_i32()?);
+  let mut stdin = InputReader::new()?;
+  println!("{}\n{}\n{}", stdin.next_u32()?, stdin.next_word()?, stdin.next_i32()?);
   Ok(())
 }
