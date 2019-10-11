@@ -4,6 +4,7 @@ pub struct InputReader {
   buf: Vec<u8>,
   bytes_read: usize,
   current_index: usize,
+  str_buf: String,
 }
 
 // Constructors
@@ -15,6 +16,7 @@ impl InputReader {
       buf: vec![0; buf_size],
       bytes_read: 0,
       current_index: 0,
+      str_buf: String::with_capacity(1 << 8),
     };
     input.ensure_buffer()?;
     Ok(input)
@@ -59,27 +61,21 @@ impl InputReader {
   pub fn next_word(&mut self) -> Result<String> {
     self.consume_until(|c| c.is_ascii_graphic())?;
 
-    let mut word = String::new();
-    loop {
-      let c = self.peek();
-      if c.is_whitespace() {
-        return Ok(word);
-      }
-      word.push(c);
+    self.str_buf.clear();
+    while self.peek().is_ascii_graphic() {
+      self.str_buf.push(self.peek());
       self.consume()?;
     }
+    Ok(self.str_buf.clone())
   }
 
   pub fn next_line(&mut self) -> Result<String> {
-    let mut line = String::new();
-    loop {
-      let c = self.peek();
-      if c == '\n' {
-        return Ok(line);
-      }
-      line.push(c);
+    self.str_buf.clear();
+    while self.peek() != '\n' {
+      self.str_buf.push(self.peek());
       self.consume()?;
     }
+    Ok(self.str_buf.clone())
   }
 
   pub fn next_u32(&mut self) -> Result<u32> { Ok(self.next_usize()? as u32) }
@@ -109,8 +105,8 @@ impl InputReader {
     Ok(())
   }
 
-  fn consume_until<F: Fn(char) -> bool>(&mut self, testFn: F) -> Result<()> {
-    while !testFn(self.peek()) {
+  fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) -> Result<()> {
+    while !test(self.peek()) {
       self.consume()?;
     }
     Ok(())
