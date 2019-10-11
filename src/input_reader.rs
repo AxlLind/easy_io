@@ -28,7 +28,7 @@ impl InputReader {
 
     let mut num = 0;
     loop {
-      let c = self.peek_next();
+      let c = self.peek();
       if !c.is_ascii_digit() {
         return Ok(num);
       }
@@ -39,14 +39,19 @@ impl InputReader {
   }
 
   pub fn next_i64(&mut self) -> Result<i64> {
-    self.consume_until(|c| c.is_ascii_digit() || c == '-')?;
+    loop {
+      self.consume_until(|c| c.is_ascii_digit() || c == '-')?;
 
-    let mut sign = 1;
-    if self.peek_next() == '-' {
-      sign = -1;
-      self.consume()?;
+      let mut sign = 1;
+      if self.peek() == '-' {
+        sign = -1;
+        self.consume()?;
+        if !self.peek().is_ascii_digit() {
+          continue;
+        }
+      }
+      return Ok(self.next_usize()? as i64 * sign)
     }
-    Ok(self.next_usize()? as i64 * sign)
   }
 
   pub fn next_f64(&mut self) -> Result<f64> { Ok(self.next_word()?.parse().unwrap()) }
@@ -56,7 +61,7 @@ impl InputReader {
 
     let mut word = String::new();
     loop {
-      let c = self.peek_next();
+      let c = self.peek();
       if c.is_whitespace() {
         return Ok(word);
       }
@@ -68,7 +73,7 @@ impl InputReader {
   pub fn next_line(&mut self) -> Result<String> {
     let mut line = String::new();
     loop {
-      let c = self.peek_next();
+      let c = self.peek();
       if c == '\n' {
         return Ok(line);
       }
@@ -96,7 +101,7 @@ impl InputReader {
     Ok(())
   }
 
-  fn peek_next(&self) -> char { self.buf[self.current_index] as char }
+  fn peek(&self) -> char { self.buf[self.current_index] as char }
 
   fn consume(&mut self) -> Result<()> {
     self.current_index += 1;
@@ -104,8 +109,8 @@ impl InputReader {
     Ok(())
   }
 
-  fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) -> Result<()> {
-    while !test(self.peek_next()) {
+  fn consume_until<F: Fn(char) -> bool>(&mut self, testFn: F) -> Result<()> {
+    while !testFn(self.peek()) {
       self.consume()?;
     }
     Ok(())
