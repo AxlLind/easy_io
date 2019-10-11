@@ -36,18 +36,25 @@ fn main() -> std::io::Result<()> {
 }
 ```
 
-## All public methods
-
+## Public methods
 ### Constructors
-- `InputReader::new() -> Result<InputReader>` - Constructs an InputReader which reads from stdin.
-- `InputReader::from_file(path: &str) -> Result<InputReader>` - Constructs an InputReader which reads from the file at the given path.
-- `InputReader::from_reader(reader: Box<dyn Read>) -> Result<InputReader>` - Constructs an InputReader that reads from the given reader.
+```Rust
+// Constructs an InputReader which reads from stdin.
+InputReader::new() -> Result<InputReader>
+```
 
-### Instance methods
-- `InputReader::set_buf_size(&mut self, buf_size: usize)` - Changes the internal buffer size of the InputReader. Default: `2^16 bytes`
+```Rust
+// Constructs an InputReader which reads from the file at the given path.
+InputReader::from_file(path: &str) -> Result<InputReader>
+```
+
+```Rust
+// Constructs an InputReader that reads from the given reader.
+InputReader::from_reader(reader: Box<dyn Read>) -> Result<InputReader>
+```
 
 ### Reader methods
-The following methods are self-explanatory. They read the next *thing* from the input.
+The following methods are self-explanatory. They read the next *thing* from the input source.
 
 ```Rust
 InputReader::next_word(&mut self) -> Result<String>
@@ -59,4 +66,10 @@ InputReader::next_u32(&mut self) -> Result<u32>
 InputReader::next_u64(&mut self) -> Result<u64>
 InputReader::next_i32(&mut self) -> Result<i32>
 InputReader::next_f32(&mut self) -> Result<f32>
+```
+
+### Instance methods
+```Rust
+// Changes the internal buffer size of the InputReader. Default: 2^16 bytes
+InputReader::set_buf_size(&mut self, buf_size: usize)
 ```
