@@ -117,9 +117,3 @@ impl InputReader {
     Ok(())
   }
 }
-
-fn main() -> Result<()> {
-  let mut stdin = InputReader::new()?;
-  println!("{}\n{}\n{}", stdin.next_u32()?, stdin.next_word()?, stdin.next_i32()?);
-  Ok(())
-}
