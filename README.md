@@ -54,18 +54,18 @@ InputReader::from_reader(reader: Box<dyn Read>) -> Result<InputReader>
 ```
 
 ### Reader methods
-The following methods are self-explanatory. They read the next *thing* from the input source.
+The following methods are pretty self-explanatory. They read the next *thing* from the input source.
 
 ```Rust
-InputReader::next_word(&mut self) -> Result<String>
-InputReader::next_line(&mut self) -> Result<String>
 InputReader::next_usize(&mut self) -> Result<usize>
+InputReader::next_i32(&mut self) -> Result<i32>
 InputReader::next_i64(&mut self) -> Result<i64>
-InputReader::next_f64(&mut self) -> Result<f64>
 InputReader::next_u32(&mut self) -> Result<u32>
 InputReader::next_u64(&mut self) -> Result<u64>
-InputReader::next_i32(&mut self) -> Result<i32>
 InputReader::next_f32(&mut self) -> Result<f32>
+InputReader::next_f64(&mut self) -> Result<f64>
+InputReader::next_word(&mut self) -> Result<String>
+InputReader::next_line(&mut self) -> Result<String>
 ```
 
 ### Instance methods
