@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::io::{self, Read, Result};
 use std::fs::File;
 
