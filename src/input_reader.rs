@@ -52,7 +52,6 @@ impl InputReader {
 
   pub fn next_word(&mut self) -> Result<String> {
     self.consume_until(|c| c.is_ascii_graphic())?;
-    self.assert_has_more()?;
 
     self.str_buf.clear();
     while self.has_more()? && self.peek().is_ascii_graphic() {
@@ -74,7 +73,6 @@ impl InputReader {
 
   pub fn next_usize(&mut self) -> Result<usize> {
     self.consume_until(|c| c.is_ascii_digit())?;
-    self.assert_has_more()?;
 
     let mut num = 0;
     while self.has_more()? && self.peek().is_ascii_digit() {
@@ -86,13 +84,11 @@ impl InputReader {
   }
 
   pub fn next_i64(&mut self) -> Result<i64> {
-    self.assert_has_more()?;
     let sign = self.consume_until_signed_num()?;
     Ok(self.next_usize()? as i64 * sign)
   }
 
   pub fn next_f64(&mut self) -> Result<f64> {
-    self.assert_has_more()?;
     let sign = self.consume_until_signed_num()? as f64;
     let num: f64 = self.next_word()?.parse().unwrap();
     Ok(num * sign)
@@ -132,15 +128,16 @@ impl InputReader {
   }
 
   fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) -> Result<()> {
-    while self.has_more()? && !test(self.peek()) {
+    while !test(self.peek()) {
       self.consume();
+      self.assert_has_more()?;
     }
     Ok(())
   }
 
   fn consume_until_signed_num(&mut self) -> Result<i64> {
     let mut sign = 1;
-    while self.has_more()? {
+    loop {
       self.consume_until(|c| c.is_ascii_digit() || c == '-')?;
 
       if self.peek() != '-' { break; }
@@ -156,13 +153,4 @@ impl InputReader {
     }
     Ok(sign)
   }
-}
-
-fn main() -> Result<()> {
-  let s = "1 hej -123 abc 123.04".as_bytes();
-  let mut input = InputReader::from_reader(Box::new(s));
-  input.set_buf_size(1)?;
-
-  println!("{}\n{}\n{}\n{}", input.next_u8()?, input.next_word()?, input.next_i32()?, input.next_f64()?);
-  Ok(())
 }
