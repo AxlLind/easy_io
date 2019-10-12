@@ -92,8 +92,8 @@ impl InputReader {
 
   pub fn next_f64(&mut self) -> Result<f64> {
     let sign = self.consume_until_signed_num()? as f64;
-    let float: f64 = self.next_word()?.parse().unwrap();
-    Ok(float * sign)
+    let num: f64 = self.next_word()?.parse().unwrap();
+    Ok(num * sign)
   }
 
   pub fn next_u8(&mut self)  -> Result<u8>  { Ok(self.next_usize()? as u8)  }
@@ -153,12 +153,4 @@ impl InputReader {
     }
     Ok(sign)
   }
-}
-
-fn main() -> Result<()> {
-  let s = "1 hej -123 abc 123.04".as_bytes();
-  let mut input = InputReader::from_reader(Box::new(s));
-
-  println!("{}\n{}\n{}\n{}", input.next_u8()?, input.next_word()?, input.next_i32()?, input.next_f64()?);
-  Ok(())
 }
