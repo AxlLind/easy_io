@@ -1,8 +1,8 @@
-use std::io::{self, Read, Result, Error};
+use std::io::{self, Read, Result};
 use std::fs::File;
 
 macro_rules! io_error {
-  ($s:expr) => { Err(Error::new(io::ErrorKind::Other, format!("InputReader: {}", $s))) }
+  ($s:expr) => { Err(io::Error::new(io::ErrorKind::Other, format!("InputReader: {}", $s))) }
 }
 
 pub struct InputReader {
@@ -54,19 +54,24 @@ impl InputReader {
     self.consume_until(|c| c.is_ascii_graphic())?;
 
     self.str_buf.clear();
-    while self.has_more()? && self.peek().is_ascii_graphic() {
+    while self.peek().is_ascii_graphic() {
       self.str_buf.push(self.peek());
       self.consume();
+      if !self.has_more()? { break; }
     }
     Ok(self.str_buf.clone())
   }
 
   pub fn next_line(&mut self) -> Result<String> {
+    if self.peek() == '\n' {
+      self.consume();
+    }
     self.assert_has_more()?;
     self.str_buf.clear();
-    while self.has_more()? && self.peek() != '\n' {
+    while self.peek() != '\n' {
       self.str_buf.push(self.peek());
       self.consume();
+      if !self.has_more()? { break; }
     }
     Ok(self.str_buf.clone())
   }
@@ -75,10 +80,11 @@ impl InputReader {
     self.consume_until(|c| c.is_ascii_digit())?;
 
     let mut num = 0;
-    while self.has_more()? && self.peek().is_ascii_digit() {
+    while self.peek().is_ascii_digit() {
       let digit = self.peek() as usize - '0' as usize;
       num = num * 10 + digit;
       self.consume();
+      if !self.has_more()? { break; }
     }
     Ok(num)
   }
@@ -122,7 +128,7 @@ impl InputReader {
 
   fn assert_has_more(&mut self) -> Result<()> {
     if !self.has_more()? {
-      return io_error!("No more input");
+      return io_error!("Reached end of input");
     }
     Ok(())
   }
