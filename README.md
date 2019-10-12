@@ -72,10 +72,15 @@ InputReader::next_u64(&mut self) -> Result<u64>
 
 InputReader::next_f32(&mut self) -> Result<f32>
 InputReader::next_f64(&mut self) -> Result<f64>
-
-InputReader::next_word(&mut self) -> Result<String>
-InputReader::next_line(&mut self) -> Result<String>
 ```
+
+The two string methods return a `&str` instead of a `String` for optimization reasons.
+```Rust
+InputReader::next_word(&mut self) -> Result<&str>
+InputReader::next_line(&mut self) -> Result<&str>
+```
+
+You can convert it into a `String` that you own by doing `input.next_word()?.to_string()`.
 
 ### Other instance methods
 ```Rust

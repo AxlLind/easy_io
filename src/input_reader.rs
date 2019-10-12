@@ -51,7 +51,7 @@ impl InputReader {
     Ok(self.bytes_read > 0)
   }
 
-  pub fn next_word(&mut self) -> Result<String> {
+  pub fn next_word(&mut self) -> Result<&str> {
     self.consume_until(|c| c.is_ascii_graphic())?;
 
     self.str_buf.clear();
@@ -60,10 +60,10 @@ impl InputReader {
       self.consume();
       if !self.has_more()? { break; }
     }
-    Ok(self.str_buf.clone())
+    Ok(&self.str_buf)
   }
 
-  pub fn next_line(&mut self) -> Result<String> {
+  pub fn next_line(&mut self) -> Result<&str> {
     if self.peek() == '\n' {
       self.consume();
     }
@@ -74,7 +74,7 @@ impl InputReader {
       self.consume();
       if !self.has_more()? { break; }
     }
-    Ok(self.str_buf.clone())
+    Ok(&self.str_buf)
   }
 
   pub fn next_usize(&mut self) -> Result<usize> {
