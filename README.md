@@ -30,8 +30,8 @@ fn main() -> std::io::Result<()> {
   let x: usize = input.next_usize()?;
   let y: i64 = input.next_i64()?;
   let z: f32 = input.next_f32()?;
-  let word: String = input.next_word()?;
-  let line: String = input.next_line()?;
+  let word: String = input.next_word()?.to_string();
+  let line: String = input.next_line()?.to_string();
   Ok(())
 }
 ```
