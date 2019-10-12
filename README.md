@@ -1,7 +1,7 @@
 # InputReader
-This is a fast, easy to use, one-file class for reading numbers and words from either stdin, a file, or any other reader.
+A fast, easy to use, one-file class for reading numbers and words from stdin, a file, or any other reader in Rust.
 
-The main use of this class is in competitive programming. Reading particularly numbers from stdin via the regular `io::stdin` class is not very convenient. In competitive programming you want to be able to easily get the next number in the stream or next word since you know the exact format of the input before hand. This class makes that trivial while also being fast.
+The main use of this class is in competitive programming. Reading particularly numbers from stdin via `io::stdin` is not very convenient. In competitive programming you want to be able to easily get the next number or word in the stream since you know the exact format of the input before hand. This class makes that trivial while also being fast.
 
 ## Usage
 The simplest use-case for this in competitive programming is to download the file from [here](https://github.com/AxlLind/InputReader/blob/master/src/input_reader.rs). Then simply put it in the same folder as your solution and import it like below. Below is a simple example of using the class:

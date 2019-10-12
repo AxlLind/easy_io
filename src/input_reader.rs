@@ -86,11 +86,13 @@ impl InputReader {
   }
 
   pub fn next_i64(&mut self) -> Result<i64> {
+    self.assert_has_more()?;
     let sign = self.consume_until_signed_num()?;
     Ok(self.next_usize()? as i64 * sign)
   }
 
   pub fn next_f64(&mut self) -> Result<f64> {
+    self.assert_has_more()?;
     let sign = self.consume_until_signed_num()? as f64;
     let num: f64 = self.next_word()?.parse().unwrap();
     Ok(num * sign)
@@ -143,6 +145,7 @@ impl InputReader {
 
       if self.peek() != '-' { break; }
       self.consume();
+      self.assert_has_more()?;
 
       // need to check that the next char after
       // '-' is actually a digit
@@ -153,4 +156,13 @@ impl InputReader {
     }
     Ok(sign)
   }
+}
+
+fn main() -> Result<()> {
+  let s = "1 hej -123 abc 123.04".as_bytes();
+  let mut input = InputReader::from_reader(Box::new(s));
+  input.set_buf_size(1)?;
+
+  println!("{}\n{}\n{}\n{}", input.next_u8()?, input.next_word()?, input.next_i32()?, input.next_f64()?);
+  Ok(())
 }
