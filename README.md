@@ -58,12 +58,20 @@ The following methods are pretty self-explanatory. They read the next *thing* fr
 
 ```Rust
 InputReader::next_usize(&mut self) -> Result<usize>
+
+InputReader::next_i8(&mut self) -> Result<i8>
+InputReader::next_i16(&mut self) -> Result<i16>
 InputReader::next_i32(&mut self) -> Result<i32>
 InputReader::next_i64(&mut self) -> Result<i64>
+
+InputReader::next_u8(&mut self) -> Result<u8>
+InputReader::next_u16(&mut self) -> Result<u16>
 InputReader::next_u32(&mut self) -> Result<u32>
 InputReader::next_u64(&mut self) -> Result<u64>
+
 InputReader::next_f32(&mut self) -> Result<f32>
 InputReader::next_f64(&mut self) -> Result<f64>
+
 InputReader::next_word(&mut self) -> Result<String>
 InputReader::next_line(&mut self) -> Result<String>
 ```
@@ -73,3 +81,8 @@ InputReader::next_line(&mut self) -> Result<String>
 // Changes the internal buffer size of the InputReader. Default: 2^16 bytes
 InputReader::set_buf_size(&mut self, buf_size: usize)
 ```
+
+## :warning: Limitations
+This class sacrifices some functionality for performance:
+- This does **not** support UTF8 strings. It will treat each byte in the input source as a separate character. This is a significant speed up and in competitive programming almost always only ascii is used anyway.
+- It will not do any validation on the size of numbers before trying to fit them in a `u32` for example. This is also fine for competitive programming since number bounds are usually given.

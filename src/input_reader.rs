@@ -1,6 +1,10 @@
 use std::io::{self, Read, Result, Error};
 use std::fs::File;
 
+macro_rules! io_error {
+  ($s:expr) => { Err(Error::new(io::ErrorKind::Other, format!("InputReader: {}", $s))) }
+}
+
 pub struct InputReader {
   reader: Box<dyn Read>,
   buf: Vec<u8>,
@@ -11,13 +15,11 @@ pub struct InputReader {
 
 impl InputReader {
   pub fn new() -> Result<InputReader> {
-    let reader = Box::new(io::stdin());
-    InputReader::from_reader(reader)
+    InputReader::from_reader(Box::new( io::stdin() ))
   }
 
   pub fn from_file(path: &str) -> Result<InputReader> {
-    let reader = Box::new(File::open(path)?);
-    InputReader::from_reader(reader)
+    InputReader::from_reader(Box::new( File::open(path)? ))
   }
 
   pub fn from_reader(reader: Box<dyn Read>) -> Result<InputReader> {
@@ -32,7 +34,13 @@ impl InputReader {
     Ok(input)
   }
 
-  pub fn set_buf_size(&mut self, buf_size: usize) { self.buf.resize(buf_size, 0); }
+  pub fn set_buf_size(&mut self, buf_size: usize) -> Result<()> {
+    if buf_size < self.bytes_read {
+      return io_error!("You cannot shrink the buffer");
+    }
+    self.buf.resize(buf_size, 0);
+    Ok(())
+  }
 
   pub fn next_word(&mut self) -> Result<String> {
     self.consume_until(|c| c.is_ascii_graphic())?;
@@ -87,10 +95,16 @@ impl InputReader {
     Ok(self.next_word()?.parse().unwrap())
   }
 
+  pub fn next_u8(&mut self)  -> Result<u8>  { Ok(self.next_usize()? as u8)  }
+  pub fn next_u16(&mut self) -> Result<u16> { Ok(self.next_usize()? as u16) }
   pub fn next_u32(&mut self) -> Result<u32> { Ok(self.next_usize()? as u32) }
   pub fn next_u64(&mut self) -> Result<u64> { Ok(self.next_usize()? as u64) }
-  pub fn next_i32(&mut self) -> Result<i32> { Ok(self.next_i64()?   as i32) }
-  pub fn next_f32(&mut self) -> Result<f32> { Ok(self.next_f64()?   as f32) }
+
+  pub fn next_i8(&mut self)  -> Result<i8>  { Ok(self.next_i64()? as i8)  }
+  pub fn next_i16(&mut self) -> Result<i16> { Ok(self.next_i64()? as i16) }
+  pub fn next_i32(&mut self) -> Result<i32> { Ok(self.next_i64()? as i32) }
+
+  pub fn next_f32(&mut self) -> Result<f32> { Ok(self.next_f64()? as f32) }
 }
 
 impl InputReader {
@@ -99,7 +113,7 @@ impl InputReader {
       self.current_index = 0;
       self.bytes_read = self.reader.read(&mut self.buf[..])?;
       if self.bytes_read == 0 {
-        return Err(Error::new(io::ErrorKind::Other, "InputReader: Could not read more bytes"));
+        return io_error!("Could not read more bytes");
       }
     }
     Ok(())
