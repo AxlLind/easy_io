@@ -21,8 +21,8 @@ impl InputReader {
   }
 
   pub fn from_file(path: &str) -> Result<InputReader> {
-    let reader = Box::new( File::open(path)? );
-    Ok(InputReader::from_reader(reader))
+    let file = Box::new( File::open(path)? );
+    Ok(InputReader::from_reader(file))
   }
 
   pub fn from_reader(reader: Box<dyn Read>) -> InputReader {
@@ -38,14 +38,6 @@ impl InputReader {
 
 // public instance methods
 impl InputReader {
-  pub fn set_buf_size(&mut self, buf_size: usize) -> Result<()> {
-    if buf_size < self.bytes_read {
-      return io_error!("Data loss while shrinking buffer!");
-    }
-    self.buf.resize(buf_size, 0);
-    Ok(())
-  }
-
   pub fn has_more(&mut self) -> Result<bool> {
     self.ensure_buffer()?;
     Ok(self.bytes_read > 0)
@@ -64,9 +56,6 @@ impl InputReader {
   }
 
   pub fn next_line(&mut self) -> Result<&str> {
-    if self.peek() == '\n' {
-      self.consume();
-    }
     self.assert_has_more()?;
     self.str_buf.clear();
     while self.peek() != '\n' {
@@ -74,6 +63,7 @@ impl InputReader {
       self.consume();
       if !self.has_more()? { break; }
     }
+    self.consume(); // consume the newline
     Ok(&self.str_buf)
   }
 
@@ -111,6 +101,14 @@ impl InputReader {
   pub fn next_i32(&mut self) -> Result<i32> { Ok(self.next_i64()? as i32) }
 
   pub fn next_f32(&mut self) -> Result<f32> { Ok(self.next_f64()? as f32) }
+
+  pub fn set_buf_size(&mut self, buf_size: usize) -> Result<()> {
+    if buf_size < self.bytes_read {
+      return io_error!("Data loss while shrinking buffer!");
+    }
+    self.buf.resize(buf_size, 0);
+    Ok(())
+  }
 }
 
 // private instance methods
