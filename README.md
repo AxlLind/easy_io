@@ -5,7 +5,7 @@ The main use of these structs is in competitive programming or [Kattis](https://
 
 Regular output in Rust via `println!()` can also be problematic since it is line buffered. This can make output can be surprisingly slow. The `OutputWriter` struct buffers all output which results in a much better performance.
 
-To use these in competitive programming simply download `input_reader.rs` or `output_reader.rs` from [here](https://github.com/AxlLind/InputReader/blob/master/src/). Simply put them in the same folder as your solution and import it like below.
+To use these in competitive programming simply download [`input_reader.rs`](https://github.com/AxlLind/EasyIO.rs/blob/master/src/input_reader.rs) or [`output_reader.rs`](https://github.com/AxlLind/EasyIO.rs/blob/master/src/output_writer.rs). Put them in the same folder as your solution and import it like below.
 
 This was inspired by [this amazing](https://github.com/williamfiset/FastJavaIO) Java class but written completely separately.
 
@@ -48,18 +48,18 @@ This struct sacrifices some functionality for performance:
 ### Constructors
 ```Rust
 // Constructs an InputReader which reads from stdin.
-InputReader::new() -> InputReader
+InputReader::new() -> Self
 ```
 
 ```Rust
 // Constructs an InputReader which reads from the file at the given path.
 // Note that this returns a result since it will try to open the file.
-InputReader::from_file(path: &str) -> Result<InputReader>
+InputReader::from_file(path: &str) -> Result<Self>
 ```
 
 ```Rust
 // Constructs an InputReader that reads from the given reader.
-InputReader::from_reader(reader: Box<dyn Read>) -> InputReader
+InputReader::from_reader(reader: Box<dyn Read>) -> Self
 ```
 
 ### Reader methods
@@ -133,18 +133,18 @@ fn main() -> std::io::Result<()> {
 ### Constructors
 ```Rust
 // Constructs an OutputWriter which writes to stdout.
-OutputWriter::new() -> OutputWriter
+OutputWriter::new() -> Self
 ```
 
 ```Rust
 // Constructs an OutputWriter which writes to the file at the given path.
 // Note that this returns a result since it will try to open the file.
-OutputWriter::from_file(path: &str) -> Result<OutputWriter>
+OutputWriter::from_file(path: &str) -> Result<Self>
 ```
 
 ```Rust
 // Constructs an OutputWriter that writes to the given writer.
-OutputWriter::from_writer(reader: Box<dyn Write>) -> OutputWriter
+OutputWriter::from_writer(reader: Box<dyn Write>) -> Self
 ```
 
 ### Instance methods

@@ -16,16 +16,16 @@ pub struct InputReader {
 
 // Constructors
 impl InputReader {
-  pub fn new() -> InputReader {
-    InputReader::from_reader(Box::new( io::stdin() ))
+  pub fn new() -> Self {
+    Self::from_reader(Box::new( io::stdin() ))
   }
 
-  pub fn from_file(path: &str) -> Result<InputReader> {
+  pub fn from_file(path: &str) -> Result<Self> {
     let file = Box::new( File::open(path)? );
-    Ok(InputReader::from_reader(file))
+    Ok(Self::from_reader(file))
   }
 
-  pub fn from_reader(reader: Box<dyn Read>) -> InputReader {
+  pub fn from_reader(reader: Box<dyn Read>) -> Self {
     InputReader {
       reader,
       buf: vec![0; 1 << 16],

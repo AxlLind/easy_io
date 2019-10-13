@@ -8,17 +8,17 @@ pub struct OutputWriter {
 }
 
 impl OutputWriter {
-  pub fn new() -> OutputWriter {
-    OutputWriter::from_writer(Box::new( io::stdout() ))
+  pub fn new() -> Self {
+    Self::from_writer(Box::new( io::stdout() ))
   }
 
-  pub fn from_file(path: &str) -> Result<OutputWriter> {
+  pub fn from_file(path: &str) -> Result<Self> {
     let file = Box::new( File::open(path)? );
-    Ok(OutputWriter::from_writer(file))
+    Ok(Self::from_writer(file))
   }
 
-  pub fn from_writer(writer: Box<dyn Write>) -> OutputWriter {
-    OutputWriter {
+  pub fn from_writer(writer: Box<dyn Write>) -> Self {
+    Self {
       writer,
       buf: Vec::with_capacity(1 << 16),
     }
@@ -28,11 +28,11 @@ impl OutputWriter {
 
   pub fn writeln(&mut self, s: &str) {
     self.write(s);
-    self.buf.push('\n' as u8);
+    self.buf.push(b'\n');
   }
 
   pub fn flush(&mut self) -> Result<()> {
-    self.writer.write(&self.buf)?;
+    self.writer.write_all(&self.buf)?;
     self.buf.clear();
     Ok(())
   }
