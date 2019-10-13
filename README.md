@@ -1,11 +1,11 @@
 # EasyIO.rs
 Two structs `InputReader` and `OutputWriter` for fast and convenient IO in Rust.
 
-The main use of these structs is in competitive programming or [Kattis](https://open.kattis.com/) style problems. Reading particularly numbers from stdin via `io::stdin()` is not very convenient. In competitive programming you want to be able to easily get the next number or word in the stream since you know the exact format of the input before hand. The `InputReader` makes that trivial while also being fast.
+The main use of these structs is in competitive programming or [Kattis](https://open.kattis.com/) style problems. Reading particularly numbers via `io::stdin()` is not very convenient. In competitive programming you want to be able to easily get the next number or word in the stream since you know the exact format of the input before hand. The `InputReader` struct makes that trivial while also being fast.
 
-Regular output via `println!()` can also be problematic since it is line buffered. This can make output can be surprisingly slow. The `OutputWriter` buffers all output which results in a much better performance. See documentation below.
+Regular output in Rust via `println!()` can also be problematic since it is line buffered. This can make output can be surprisingly slow. The `OutputWriter` struct buffers all output which results in a much better performance.
 
-To use these in competitive programming simply download the files from [here](https://github.com/AxlLind/InputReader/blob/master/src/). Then simply put them in the same folder as your solution and import it like below.
+To use these in competitive programming simply download `input_reader.rs` or `output_reader.rs` from [here](https://github.com/AxlLind/InputReader/blob/master/src/). Simply put them in the same folder as your solution and import it like below.
 
 This was inspired by [this amazing](https://github.com/williamfiset/FastJavaIO) Java class but written completely separately.
 
@@ -15,8 +15,6 @@ This was inspired by [this amazing](https://github.com/williamfiset/FastJavaIO) 
 // import it
 mod input_reader;
 use input_reader::InputReader;
-
-// ...
 
 fn main() -> std::io::Result<()> {
   // Create a reader from stdin
@@ -82,15 +80,13 @@ InputReader::next_u64(&mut self) -> Result<u64>
 
 InputReader::next_f32(&mut self) -> Result<f32>
 InputReader::next_f64(&mut self) -> Result<f64>
-```
 
-The two string methods return a `&str` instead of a `String` for optimization reasons.
-```Rust
-InputReader::next_word(&mut self) -> Result<&str>
+// Note that it will not include the newline char
 InputReader::next_line(&mut self) -> Result<&str>
+InputReader::next_word(&mut self) -> Result<&str>
 ```
 
-If you need a `String` that you own you can convert it by doing `input.next_word()?.to_string()`.
+The two string methods return a `&str` instead of a `String` for optimization reasons. If you need a `String` that you own you can copy it by doing `input.next_word()?.to_string()`.
 
 ### Other instance methods
 ```Rust
@@ -108,8 +104,6 @@ InputReader::set_buf_size(&mut self, buf_size: usize) -> Result<()>
 // import it
 mod output_writer;
 use output_writer::OutputWriter;
-
-// ...
 
 fn main() -> std::io::Result<()> {
   // Create a writer from stdout
@@ -150,7 +144,7 @@ OutputWriter::from_file(path: &str) -> Result<OutputWriter>
 
 ```Rust
 // Constructs an OutputWriter that writes to the given writer.
-OutputWriter::from_reader(reader: Box<dyn Write>) -> OutputWriter
+OutputWriter::from_writer(reader: Box<dyn Write>) -> OutputWriter
 ```
 
 ### Instance methods
