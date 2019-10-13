@@ -3,9 +3,9 @@ Two structs `InputReader` and `OutputWriter` for fast and convenient IO in Rust.
 
 The main use of these structs is in competitive programming or [Kattis](https://open.kattis.com/) style problems. Reading particularly numbers from stdin via `io::stdin()` is not very convenient. In competitive programming you want to be able to easily get the next number or word in the stream since you know the exact format of the input before hand. The `InputReader` makes that trivial while also being fast.
 
-Regular output via `println!()` can also be problematic since it is line buffered which can make output can be surprisingly slow. The `OutputWriter` buffers all output which results in a much better performance. See documentation below.
+Regular output via `println!()` can also be problematic since it is line buffered. This can make output can be surprisingly slow. The `OutputWriter` buffers all output which results in a much better performance. See documentation below.
 
-To use these in competitive programming simply download the files from [here](https://github.com/AxlLind/InputReader/blob/master/src/). Then simply put it in them same folder as your solution and import it like below.
+To use these in competitive programming simply download the files from [here](https://github.com/AxlLind/InputReader/blob/master/src/). Then simply put them in the same folder as your solution and import it like below.
 
 This was inspired by [this amazing](https://github.com/williamfiset/FastJavaIO) Java class but written completely separately.
 
@@ -159,13 +159,9 @@ OutputWriter::from_reader(reader: Box<dyn Write>) -> OutputWriter
 OutputWriter::write(&mut self, s: &str)
 
 // Convenience method for writing the given string with a newline appended.
-OutputWriter::write(&mut self, s: &str)
+OutputWriter::writeln(&mut self, s: &str)
 
 // Flushes the internal buffer and writes it to the output source.
 // Note that this is called on drop so you do not have to do it manually.
 OutputWriter::flush(&mut self) -> Result<()>
-
-// Changes the internal buffer size. Default: 2^16 bytes
-// Can only be used to increase the buffer, will return error otherwise.
-OutputWriter::set_buf_size(&mut self, buf_size: usize) -> Result<()>
 ```

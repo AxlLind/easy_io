@@ -2,10 +2,6 @@
 use std::io::{self, Write, Result};
 use std::fs::File;
 
-macro_rules! io_error {
-  ($s:expr) => { Err(io::Error::new(io::ErrorKind::Other, format!("OutputWriter: {}", $s))) }
-}
-
 pub struct OutputWriter {
   writer: Box<dyn Write>,
   buf: Vec<u8>,
@@ -38,15 +34,6 @@ impl OutputWriter {
   pub fn flush(&mut self) -> Result<()> {
     self.writer.write(&self.buf)?;
     self.buf.clear();
-    Ok(())
-  }
-
-  pub fn set_buf_size(&mut self, buf_size: usize) -> Result<()> {
-    if buf_size < self.buf.len() {
-      return io_error!("Data loss while shrinking buffer!");
-    }
-    let additional = buf_size - self.buf.len();
-    self.buf.reserve(additional);
     Ok(())
   }
 }
