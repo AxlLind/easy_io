@@ -1,0 +1,11 @@
+[package]
+name = "easy_io"
+version = "0.1.0"
+license = "MIT"
+authors = ["Axel Lindeberg"]
+description = "Fast and dead-simple IO for competitive programming in Rust"
+readme = "README.md"
+homepage = "https://github.com/AxlLind/EasyIO.rs"
+repository = "https://github.com/AxlLind/EasyIO.rs"
+keywords = ["io"]
+categories = ["text-processing", "io", "competitive-programming"]
