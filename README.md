@@ -1,13 +1,18 @@
+# EasyIO.rs
+Two structs `InputReader` and `OutputWriter` for fast and convenient IO in Rust.
+
+The main use of these structs is in competitive programming or [Kattis](https://open.kattis.com/) style problems. Reading particularly numbers from stdin via `io::stdin()` is not very convenient. In competitive programming you want to be able to easily get the next number or word in the stream since you know the exact format of the input before hand. The `InputReader` makes that trivial while also being fast.
+
+Regular output via `println!()` can also be problematic since it is line buffered which can make output can be surprisingly slow. The `OutputWriter` buffers all output which results in a much better performance. See documentation below.
+
+To use these in competitive programming simply download the files from [here](https://github.com/AxlLind/InputReader/blob/master/src/). Then simply put it in them same folder as your solution and import it like below.
+
+This was inspired by [this amazing](https://github.com/williamfiset/FastJavaIO) Java class but written completely separately.
+
 # InputReader
-A fast, easy to use, one-file class for reading numbers and words from stdin, a file, or any other reader in Rust.
-
-The main use of this class is in competitive programming. Reading particularly numbers from stdin via `io::stdin` is not very convenient. In competitive programming you want to be able to easily get the next number or word in the stream since you know the exact format of the input before hand. This class makes that trivial while also being fast.
-
 ## Usage
-The simplest use-case for this in competitive programming is to download the file from [here](https://github.com/AxlLind/InputReader/blob/master/src/input_reader.rs). Then simply put it in the same folder as your solution and import it like below. Below is a simple example of using the class:
-
 ```Rust
-// import the class
+// import it
 mod input_reader;
 use input_reader::InputReader;
 
@@ -17,14 +22,14 @@ fn main() -> std::io::Result<()> {
   // Create a reader from stdin
   let mut input = InputReader::new();
 
-  // ... or from a file.
+  // ... or from a file
   let mut input = InputReader::from_file("input.txt")?;
 
-  // ... or from any class that implements the Read trait.
+  // ... or from any struct that implements the Read trait.
   // The reader needs to be wrapped in a Box.
   // In this example from a tcp stream:
-  let tcp_stream = TcpStream::connect("127.0.0.1:34254");
-  let mut input = InputReader::from_reader(Box::new(tcp_stream))?;
+  let tcp_stream = Box::new( TcpStream::connect("127.0.0.1:34254") );
+  let mut input = InputReader::from_reader(tcp_stream);
 
   // Read numbers and words from the input source simply like this.
   let x: usize = input.next_usize()?;
@@ -35,6 +40,11 @@ fn main() -> std::io::Result<()> {
   Ok(())
 }
 ```
+
+## :warning: Limitations
+This struct sacrifices some functionality for performance:
+- This does **not** support UTF8 strings. It will treat each byte in the input source as a separate character. This is a significant speed up and in competitive programming almost always only ascii is used anyway.
+- It will not do any validation on the size of numbers before trying to fit them in a `u32` for example. This is also fine for competitive programming since number bounds are usually given.
 
 ## Public methods
 ### Constructors
@@ -80,7 +90,7 @@ InputReader::next_word(&mut self) -> Result<&str>
 InputReader::next_line(&mut self) -> Result<&str>
 ```
 
-You can convert it into a `String` that you own by doing `input.next_word()?.to_string()`.
+If you need a `String` that you own you can convert it by doing `input.next_word()?.to_string()`.
 
 ### Other instance methods
 ```Rust
@@ -92,7 +102,70 @@ InputReader::has_more(&mut self) -> Result<bool>
 InputReader::set_buf_size(&mut self, buf_size: usize) -> Result<()>
 ```
 
-## :warning: Limitations
-This class sacrifices some functionality for performance:
-- This does **not** support UTF8 strings. It will treat each byte in the input source as a separate character. This is a significant speed up and in competitive programming almost always only ascii is used anyway.
-- It will not do any validation on the size of numbers before trying to fit them in a `u32` for example. This is also fine for competitive programming since number bounds are usually given.
+# OutputWriter
+## Usage
+```Rust
+// import it
+mod output_writer;
+use output_writer::OutputWriter;
+
+// ...
+
+fn main() -> std::io::Result<()> {
+  // Create a writer from stdout
+  let mut output = OutputWriter::new();
+
+  // ... or from a file
+  let mut input = OutputWriter::from_file("input.txt")?;
+
+  // ... or from any struct that implements the Write trait.
+  // The writer needs to be wrapped in a Box.
+  // In this example from a tcp stream:
+  let tcp_stream = Box::new( TcpStream::connect("127.0.0.1:34254") );
+  let mut input = OutputWriter::from_writer(tcp_stream);
+
+  // Write to the output source simply like this.
+  output.writeln("Hello world!");
+  output.write(&format!("{} is a cool number.\n", 1337));
+
+  // Optionally you can manually flush the writer.
+  // This will be done automatically when the writer is dropped.
+  output.flush()?;
+  Ok(())
+}
+```
+
+## Public methods
+### Constructors
+```Rust
+// Constructs an OutputWriter which writes to stdout.
+OutputWriter::new() -> OutputWriter
+```
+
+```Rust
+// Constructs an OutputWriter which writes to the file at the given path.
+// Note that this returns a result since it will try to open the file.
+OutputWriter::from_file(path: &str) -> Result<OutputWriter>
+```
+
+```Rust
+// Constructs an OutputWriter that writes to the given writer.
+OutputWriter::from_reader(reader: Box<dyn Write>) -> OutputWriter
+```
+
+### Instance methods
+```Rust
+// Writes the string to the output source.
+OutputWriter::write(&mut self, s: &str)
+
+// Convenience method for writing the given string with a newline appended.
+OutputWriter::write(&mut self, s: &str)
+
+// Flushes the internal buffer and writes it to the output source.
+// Note that this is called on drop so you do not have to do it manually.
+OutputWriter::flush(&mut self) -> Result<()>
+
+// Changes the internal buffer size. Default: 2^16 bytes
+// Can only be used to increase the buffer, will return error otherwise.
+OutputWriter::set_buf_size(&mut self, buf_size: usize) -> Result<()>
+```
