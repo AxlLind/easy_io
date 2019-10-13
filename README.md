@@ -41,7 +41,7 @@ fn main() -> std::io::Result<()> {
 
 ## :warning: Limitations
 This struct sacrifices some functionality for performance:
-- This does **not** support UTF8 strings. It will treat each byte in the input source as a separate character. This is a significant speed up and in competitive programming almost always only ascii is used anyway.
+- This does **not** support UTF8 strings. It will treat each byte in the input source as a separate character. This is a significant speed up and in competitive programming only ascii is almost always used anyway.
 - It will not do any validation on the size of numbers before trying to fit them in a `u32` for example. This is also fine for competitive programming since number bounds are usually given.
 
 ## Public methods

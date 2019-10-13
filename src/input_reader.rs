@@ -1,3 +1,11 @@
+/*
+  A Fast and dead-simple reader for competitive programming in Rust
+
+  Author: Axel Lindeberg, github.com/AxlLind
+  Website: https://github.com/AxlLind/EasyIO.rs
+  License: MIT
+  2019
+*/
 #![allow(dead_code)]
 use std::io::{self, Read, Result};
 use std::fs::File;
