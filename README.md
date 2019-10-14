@@ -91,11 +91,11 @@ The two string methods return a `&str` instead of a `String` for optimization re
 
 ### Other instance methods
 ```Rust
-// Returns Ok(true) if there is more data to be read, Ok(false) otherwise.
+// Returns true if there is more data to be read, false otherwise.
 InputReader::has_more(&mut self) -> bool
 
 // Changes the internal buffer size. Default: 2^16 bytes
-// Will return error if shrinking the buffer will cause data loss.
+// Will panic if shrinking the buffer would cause data loss.
 InputReader::set_buf_size(&mut self, buf_size: usize)
 ```
 

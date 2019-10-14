@@ -10,6 +10,10 @@
 use std::io::{self, Read};
 use std::fs::File;
 
+macro_rules! assert_has_more {
+  ($self:ident) => { assert!($self.has_more(), "InputReader: Reached end of input!"); }
+}
+
 pub struct InputReader {
   reader: Box<dyn Read>,
   buf: Vec<u8>,
@@ -60,7 +64,7 @@ impl InputReader {
   }
 
   pub fn next_line(&mut self) -> &str {
-    self.assert_has_more();
+    assert_has_more!(self);
     self.str_buf.clear();
     while self.peek() != '\n' {
       self.str_buf.push(self.peek());
@@ -114,8 +118,10 @@ impl InputReader {
 
 // private instance methods
 impl InputReader {
+  #[inline(always)]
   fn peek(&self) -> char { self.buf[self.current_index] as char }
 
+  #[inline(always)]
   fn consume(&mut self) { self.current_index += 1; }
 
   fn ensure_buffer(&mut self) {
@@ -126,14 +132,10 @@ impl InputReader {
     self.current_index = 0;
   }
 
-  fn assert_has_more(&mut self) {
-    assert!(self.has_more(), "InputReader: Reached end of input!")
-  }
-
   fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) {
     while !test(self.peek()) {
       self.consume();
-      self.assert_has_more();
+      assert_has_more!(self);
     }
   }
 
@@ -144,7 +146,7 @@ impl InputReader {
 
       if self.peek() != '-' { break; }
       self.consume();
-      self.assert_has_more();
+      assert_has_more!(self);
 
       // need to check that the next char after
       // '-' is actually a digit
