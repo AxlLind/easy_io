@@ -7,7 +7,7 @@
   2019
 */
 #![allow(dead_code)]
-use std::io::{self, Write, Result};
+use std::io::{self, Write};
 use std::fs::File;
 
 pub struct OutputWriter {
@@ -20,9 +20,9 @@ impl OutputWriter {
     Self::from_writer(Box::new( io::stdout() ))
   }
 
-  pub fn from_file(path: &str) -> Result<Self> {
-    let file = Box::new( File::open(path)? );
-    Ok(Self::from_writer(file))
+  pub fn from_file(path: &str) -> Self {
+    let file = Box::new( File::open(path).unwrap() );
+    Self::from_writer(file)
   }
 
   pub fn from_writer(writer: Box<dyn Write>) -> Self {
@@ -39,13 +39,12 @@ impl OutputWriter {
     self.buf.push(b'\n');
   }
 
-  pub fn flush(&mut self) -> Result<()> {
-    self.writer.write_all(&self.buf)?;
+  pub fn flush(&mut self) {
+    self.writer.write_all(&self.buf).unwrap();
     self.buf.clear();
-    Ok(())
   }
 }
 
 impl Drop for OutputWriter {
-  fn drop(&mut self) { self.flush().unwrap(); }
+  fn drop(&mut self) { self.flush(); }
 }
