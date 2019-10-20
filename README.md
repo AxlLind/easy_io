@@ -106,12 +106,12 @@ InputReader::set_buf_size(&mut self, buf_size: usize)
 mod output_writer;
 use output_writer::OutputWriter;
 
-fn main() {
+fn main() -> std::io::Result<()> {
   // Create a writer from stdout
   let mut output = OutputWriter::new();
 
   // ... or from a file
-  let mut input = OutputWriter::from_file("input.txt");
+  let mut input = OutputWriter::from_file("output.txt");
 
   // ... or from any struct that implements the Write trait.
   // The writer needs to be wrapped in a Box.
@@ -120,16 +120,23 @@ fn main() {
   let mut input = OutputWriter::from_writer(tcp_stream);
 
   // Write to the output source simply like this.
-  output.writeln("Hello world!");
-  output.write(&format!("{} is a cool number.\n", 1337));
+  output.println("Hello world!");
+  output.print(&format!("{} is a cool number.\n", 1337));
 
-  // Optionally you can manually flush the writer.
-  // This will be done automatically when the writer is dropped.
-  output.flush();
+  // It also implements the write trait, so you can do this:
+  write!(output, "{} formatted!\n", "This is")?;
+  writeln!(output, "{} is the answer.", 42)?;
+
+  // You can manually flush the writer but this will
+  // be done automatically when the writer is dropped.
+  output.flush()?;
+  Ok()
 }
 ```
 
 ## Public methods
+This class implements the `Write` trait. This is mostly so we can utilize the `write!` and `writeln!` macros but this means several more methods are available on the struct. See documentation [here](https://doc.rust-lang.org/std/io/trait.Write.html).
+
 ### Constructors
 ```Rust
 // Constructs an OutputWriter which writes to stdout.
@@ -149,12 +156,8 @@ OutputWriter::from_writer(reader: Box<dyn Write>) -> Self
 ### Instance methods
 ```Rust
 // Writes the string to the output source.
-OutputWriter::write(&mut self, s: &str)
+OutputWriter::print(&mut self, s: &str)
 
 // Convenience method for writing the given string with a newline appended.
-OutputWriter::writeln(&mut self, s: &str)
-
-// Flushes the internal buffer and writes it to the output source.
-// Note that this is called on drop so you do not have to do it manually.
-OutputWriter::flush(&mut self)
+OutputWriter::println(&mut self, s: &str)
 ```

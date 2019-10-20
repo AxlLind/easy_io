@@ -7,7 +7,7 @@
   2019
 */
 #![allow(dead_code)]
-use std::io::{self, Write};
+use std::io::{self, Write, Result};
 use std::fs::File;
 
 pub struct OutputWriter {
@@ -15,9 +15,11 @@ pub struct OutputWriter {
   buf: Vec<u8>,
 }
 
+// Constructors
 impl OutputWriter {
   pub fn new() -> Self {
-    Self::from_writer(Box::new( io::stdout() ))
+    let stdout = Box::new( io::stdout() );
+    Self::from_writer(stdout)
   }
 
   pub fn from_file(path: &str) -> Self {
@@ -26,25 +28,36 @@ impl OutputWriter {
   }
 
   pub fn from_writer(writer: Box<dyn Write>) -> Self {
-    Self {
-      writer,
-      buf: Vec::with_capacity(1 << 16),
-    }
+    let buf = Vec::with_capacity(1 << 16);
+    Self { writer, buf }
+  }
+}
+
+// Instance methods
+impl OutputWriter {
+  pub fn print(&mut self, s: &str) {
+    self.buf.extend(s.as_bytes());
   }
 
-  pub fn write(&mut self, s: &str) { self.buf.extend(s.as_bytes()); }
-
-  pub fn writeln(&mut self, s: &str) {
-    self.write(s);
+  pub fn println(&mut self, s: &str) {
+    self.buf.extend(s.as_bytes());
     self.buf.push(b'\n');
   }
+}
 
-  pub fn flush(&mut self) {
-    self.writer.write_all(&self.buf).unwrap();
+impl Write for OutputWriter {
+  fn write(&mut self, s: &[u8]) -> Result<usize> {
+    self.buf.extend(s);
+    Ok(s.len())
+  }
+
+  fn flush(&mut self) -> Result<()> {
+    self.writer.write_all(&self.buf)?;
     self.buf.clear();
+    Ok(())
   }
 }
 
 impl Drop for OutputWriter {
-  fn drop(&mut self) { self.flush(); }
+  fn drop(&mut self) { self.flush().unwrap(); }
 }
