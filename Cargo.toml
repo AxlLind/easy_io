@@ -1,6 +1,6 @@
 [package]
 name = "easy_io"
-version = "0.1.0"
+version = "0.2.0"
 license = "MIT"
 authors = ["Axel Lindeberg"]
 description = "Fast and dead-simple IO for competitive programming in Rust"
