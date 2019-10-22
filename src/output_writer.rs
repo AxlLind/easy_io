@@ -1,8 +1,8 @@
 /*
-  A Fast and dead-simple writer for competitive programming in Rust
+  A fast and dead-simple writer for competitive programming in Rust
 
   Author: Axel Lindeberg, github.com/AxlLind
-  Website: https://github.com/AxlLind/EasyIO.rs
+  Repository: https://github.com/AxlLind/EasyIO.rs
   License: MIT
   2019
 */
@@ -46,9 +46,9 @@ impl OutputWriter {
 }
 
 impl Write for OutputWriter {
-  fn write(&mut self, s: &[u8]) -> Result<usize> {
-    self.buf.extend(s);
-    Ok(s.len())
+  fn write(&mut self, bytes: &[u8]) -> Result<usize> {
+    self.buf.extend(bytes);
+    Ok(bytes.len())
   }
 
   fn flush(&mut self) -> Result<()> {

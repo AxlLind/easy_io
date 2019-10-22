@@ -1,18 +1,14 @@
 /*
-  A Fast and dead-simple reader for competitive programming in Rust
+  A fast and dead-simple reader for competitive programming in Rust
 
   Author: Axel Lindeberg, github.com/AxlLind
-  Website: https://github.com/AxlLind/EasyIO.rs
+  Repository: https://github.com/AxlLind/EasyIO.rs
   License: MIT
   2019
 */
 #![allow(dead_code)]
 use std::io::{self, Read};
 use std::fs::File;
-
-macro_rules! assert_has_more {
-  ($self:ident) => { assert!($self.has_more(), "InputReader: Reached end of input!"); }
-}
 
 pub struct InputReader {
   reader: Box<dyn Read>,
@@ -34,7 +30,7 @@ impl InputReader {
   }
 
   pub fn from_reader(reader: Box<dyn Read>) -> Self {
-    InputReader {
+    Self {
       reader,
       buf: vec![0; 1 << 16],
       bytes_read: 0,
@@ -46,11 +42,6 @@ impl InputReader {
 
 // public instance methods
 impl InputReader {
-  pub fn has_more(&mut self) -> bool {
-    self.ensure_buffer();
-    self.bytes_read > 0
-  }
-
   pub fn next_word(&mut self) -> &str {
     self.consume_until(|c| c.is_ascii_graphic());
 
@@ -64,7 +55,8 @@ impl InputReader {
   }
 
   pub fn next_line(&mut self) -> &str {
-    assert_has_more!(self);
+    self.assert_has_more();
+
     self.str_buf.clear();
     while self.peek() != '\n' {
       self.str_buf.push(self.peek());
@@ -103,12 +95,18 @@ impl InputReader {
   pub fn next_u16(&mut self) -> u16 { self.next_usize() as u16 }
   pub fn next_u32(&mut self) -> u32 { self.next_usize() as u32 }
   pub fn next_u64(&mut self) -> u64 { self.next_usize() as u64 }
+  pub fn next_i8(&mut self)  -> i8  { self.next_i64()   as i8  }
+  pub fn next_i16(&mut self) -> i16 { self.next_i64()   as i16 }
+  pub fn next_i32(&mut self) -> i32 { self.next_i64()   as i32 }
+  pub fn next_f32(&mut self) -> f32 { self.next_f64()   as f32 }
 
-  pub fn next_i8(&mut self)  -> i8  { self.next_i64() as i8  }
-  pub fn next_i16(&mut self) -> i16 { self.next_i64() as i16 }
-  pub fn next_i32(&mut self) -> i32 { self.next_i64() as i32 }
-
-  pub fn next_f32(&mut self) -> f32 { self.next_f64() as f32 }
+  pub fn has_more(&mut self) -> bool {
+    if self.current_index >= self.bytes_read {
+      self.bytes_read = self.reader.read(&mut self.buf[..]).unwrap();
+      self.current_index = 0
+    }
+    self.bytes_read > 0
+  }
 
   pub fn set_buf_size(&mut self, buf_size: usize) {
     assert!(buf_size >= self.bytes_read, "InputReader: Data loss while shrinking buffer!");
@@ -118,24 +116,18 @@ impl InputReader {
 
 // private instance methods
 impl InputReader {
-  #[inline(always)]
   fn peek(&self) -> char { self.buf[self.current_index] as char }
 
-  #[inline(always)]
   fn consume(&mut self) { self.current_index += 1; }
 
-  fn ensure_buffer(&mut self) {
-    if self.current_index < self.bytes_read {
-      return;
-    }
-    self.bytes_read = self.reader.read(&mut self.buf[..]).unwrap();
-    self.current_index = 0;
+  fn assert_has_more(&mut self) {
+    assert!(self.has_more(), "InputReader: Reached end of input!");
   }
 
   fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) {
     while !test(self.peek()) {
       self.consume();
-      assert_has_more!(self);
+      self.assert_has_more();
     }
   }
 
@@ -146,9 +138,9 @@ impl InputReader {
 
       if self.peek() != '-' { break; }
       self.consume();
-      assert_has_more!(self);
+      self.assert_has_more();
 
-      // need to check that the next char after
+      // need to check that the char after
       // '-' is actually a digit
       if self.peek().is_ascii_digit() {
         sign = -1;
