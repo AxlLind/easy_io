@@ -53,6 +53,7 @@ impl Write for OutputWriter {
 
   fn flush(&mut self) -> Result<()> {
     self.writer.write_all(&self.buf)?;
+    self.writer.flush()?;
     self.buf.clear();
     Ok(())
   }
