@@ -8,7 +8,7 @@
 */
 #![allow(dead_code)]
 use std::io::{self, Write, Stdout, Result};
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 
 pub struct OutputWriter<W: Write> {
   writer: W,
@@ -16,15 +16,16 @@ pub struct OutputWriter<W: Write> {
 }
 
 impl OutputWriter<Stdout> {
-  pub fn new() -> Self {
-    Self::from_writer(io::stdout())
-  }
+  pub fn new() -> Self { Self::from_writer(io::stdout()) }
 }
 
 impl OutputWriter<File> {
   pub fn from_file(path: &str) -> Self {
-    let file = File::open(path).unwrap();
-    Self::from_writer(file)
+    let file = OpenOptions::new()
+      .write(true)
+      .create(true)
+      .open(path);
+    Self::from_writer(file.unwrap())
   }
 }
 

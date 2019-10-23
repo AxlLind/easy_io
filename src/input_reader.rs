@@ -18,17 +18,13 @@ pub struct InputReader<R: Read> {
   str_buf: String,
 }
 
-// Constructors
 impl InputReader<Stdin> {
-  pub fn new() -> Self {
-    Self::from_reader(io::stdin())
-  }
+  pub fn new() -> Self { Self::from_reader(io::stdin()) }
 }
 
 impl InputReader<File> {
   pub fn from_file(path: &str) -> Self {
-    let file = File::open(path).unwrap();
-    Self::from_reader(file)
+    Self::from_reader(File::open(path).unwrap())
   }
 }
 
