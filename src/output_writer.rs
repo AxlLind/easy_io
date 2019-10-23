@@ -7,34 +7,33 @@
   2019
 */
 #![allow(dead_code)]
-use std::io::{self, Write, Result};
+use std::io::{self, Write, Stdout, Result};
 use std::fs::File;
 
-pub struct OutputWriter {
-  writer: Box<dyn Write>,
+pub struct OutputWriter<W: Write> {
+  writer: W,
   buf: Vec<u8>,
 }
 
-// Constructors
-impl OutputWriter {
+impl OutputWriter<Stdout> {
   pub fn new() -> Self {
-    let stdout = Box::new( io::stdout() );
-    Self::from_writer(stdout)
-  }
-
-  pub fn from_file(path: &str) -> Self {
-    let file = Box::new( File::open(path).unwrap() );
-    Self::from_writer(file)
-  }
-
-  pub fn from_writer(writer: Box<dyn Write>) -> Self {
-    let buf = Vec::with_capacity(1 << 16);
-    Self { writer, buf }
+    Self::from_writer(io::stdout())
   }
 }
 
-// Instance methods
-impl OutputWriter {
+impl OutputWriter<File> {
+  pub fn from_file(path: &str) -> Self {
+    let file = File::open(path).unwrap();
+    Self::from_writer(file)
+  }
+}
+
+impl<W: Write> OutputWriter<W> {
+  pub fn from_writer(writer: W) -> Self {
+    let buf = Vec::with_capacity(1 << 16);
+    Self { writer, buf }
+  }
+
   pub fn print(&mut self, s: &str) {
     self.buf.extend(s.as_bytes());
   }
@@ -45,7 +44,7 @@ impl OutputWriter {
   }
 }
 
-impl Write for OutputWriter {
+impl<W: Write> Write for OutputWriter<W> {
   fn write(&mut self, bytes: &[u8]) -> Result<usize> {
     self.buf.extend(bytes);
     Ok(bytes.len())
@@ -59,6 +58,6 @@ impl Write for OutputWriter {
   }
 }
 
-impl Drop for OutputWriter {
+impl<W: Write> Drop for OutputWriter<W> {
   fn drop(&mut self) { self.flush().unwrap(); }
 }

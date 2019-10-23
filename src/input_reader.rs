@@ -7,11 +7,11 @@
   2019
 */
 #![allow(dead_code)]
-use std::io::{self, Read};
+use std::io::{self, Read, Stdin};
 use std::fs::File;
 
-pub struct InputReader {
-  reader: Box<dyn Read>,
+pub struct InputReader<R: Read> {
+  reader: R,
   buf: Vec<u8>,
   bytes_read: usize,
   current_index: usize,
@@ -19,17 +19,21 @@ pub struct InputReader {
 }
 
 // Constructors
-impl InputReader {
+impl InputReader<Stdin> {
   pub fn new() -> Self {
-    Self::from_reader(Box::new( io::stdin() ))
+    Self::from_reader(io::stdin())
   }
+}
 
+impl InputReader<File> {
   pub fn from_file(path: &str) -> Self {
-    let file = Box::new( File::open(path).unwrap() );
+    let file = File::open(path).unwrap();
     Self::from_reader(file)
   }
+}
 
-  pub fn from_reader(reader: Box<dyn Read>) -> Self {
+impl<R: Read> InputReader<R> {
+  pub fn from_reader(reader: R) -> Self {
     Self {
       reader,
       buf: vec![0; 1 << 16],
@@ -38,10 +42,7 @@ impl InputReader {
       str_buf: String::with_capacity(1 << 8),
     }
   }
-}
 
-// public instance methods
-impl InputReader {
   pub fn next_word(&mut self) -> &str {
     self.consume_until(|c| c.is_ascii_graphic());
 
@@ -112,10 +113,9 @@ impl InputReader {
     assert!(buf_size >= self.bytes_read, "InputReader: Data loss while shrinking buffer!");
     self.buf.resize(buf_size, 0);
   }
-}
 
-// private instance methods
-impl InputReader {
+  // private methods
+
   fn peek(&self) -> char { self.buf[self.current_index] as char }
 
   fn consume(&mut self) { self.current_index += 1; }
