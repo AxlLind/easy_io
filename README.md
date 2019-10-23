@@ -24,9 +24,7 @@ fn main() {
   let mut input = InputReader::from_file("input.txt");
 
   // ... or from any struct that implements the Read trait.
-  // The reader needs to be wrapped in a Box.
-  // In this example from a tcp stream:
-  let tcp_stream = Box::new( TcpStream::connect("127.0.0.1:34254") );
+  let tcp_stream = TcpStream::connect("127.0.0.1:34254");
   let mut input = InputReader::from_reader(tcp_stream);
 
   // Read numbers and words from the input source simply like this.
@@ -60,7 +58,7 @@ InputReader::from_file(path: &str) -> Self
 
 ```Rust
 // Constructs an InputReader that reads from the given reader.
-InputReader::from_reader(reader: Box<dyn Read>) -> Self
+InputReader::from_reader(reader: R) -> Self
 ```
 
 ### Reader methods
@@ -91,7 +89,7 @@ The two string methods return a `&str` instead of a `String` for optimization re
 
 ### Other instance methods
 ```Rust
-// Returns true if there is more data to be read, false otherwise.
+// Returns true if there is more data to be read from the input source.
 InputReader::has_more(&mut self) -> bool
 
 // Changes the internal buffer size. Default: 2^16 bytes
@@ -111,23 +109,21 @@ fn main() -> std::io::Result<()> {
   let mut output = OutputWriter::new();
 
   // ... or from a file
-  let mut input = OutputWriter::from_file("output.txt");
+  let mut output = OutputWriter::from_file("output.txt");
 
   // ... or from any struct that implements the Write trait.
-  // The writer needs to be wrapped in a Box.
-  // In this example from a tcp stream:
-  let tcp_stream = Box::new( TcpStream::connect("127.0.0.1:34254") );
-  let mut input = OutputWriter::from_writer(tcp_stream);
+  let tcp_stream = TcpStream::connect("127.0.0.1:34254");
+  let mut output = OutputWriter::from_writer(tcp_stream);
 
   // Write to the output source simply like this.
   output.println("Hello world!");
   output.print(&format!("{} is a cool number.\n", 1337));
 
-  // It also implements the write trait, so you can do this:
+  // It also implements the Write trait, so you can do this:
   write!(output, "{} formatted!\n", "This is")?;
   writeln!(output, "{} is the answer.", 42)?;
 
-  // You can manually flush the writer but this will
+  // You can manually flush the writer. Note that this will
   // be done automatically when the writer is dropped.
   output.flush()?;
   Ok()
@@ -150,7 +146,7 @@ OutputWriter::from_file(path: &str) -> Self
 
 ```Rust
 // Constructs an OutputWriter that writes to the given writer.
-OutputWriter::from_writer(reader: Box<dyn Write>) -> Self
+OutputWriter::from_writer(writer: W) -> Self
 ```
 
 ### Instance methods
