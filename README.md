@@ -83,6 +83,7 @@ InputReader::next_f64(&mut self) -> f64
 // Note that it will not include the newline char
 InputReader::next_line(&mut self) -> &str
 InputReader::next_word(&mut self) -> &str
+InputReader::next_char(&mut self) -> char
 ```
 
 The two string methods return a `&str` instead of a `String` for optimization reasons. If you need a `String` that you own you can copy it by doing `input.next_word().to_string()`.

@@ -19,7 +19,9 @@ pub struct InputReader<R: Read> {
 }
 
 impl InputReader<Stdin> {
-  pub fn new() -> Self { Self::from_reader(io::stdin()) }
+  pub fn new() -> Self {
+    Self::from_reader(io::stdin())
+  }
 }
 
 impl InputReader<File> {
@@ -64,6 +66,14 @@ impl<R: Read> InputReader<R> {
     &self.str_buf
   }
 
+  pub fn next_char(&mut self) -> char {
+    self.consume_until(|c| c.is_ascii_graphic());
+
+    let c = self.peek();
+    self.consume();
+    c
+  }
+
   pub fn next_usize(&mut self) -> usize {
     self.consume_until(|c| c.is_ascii_digit());
 
@@ -88,15 +98,6 @@ impl<R: Read> InputReader<R> {
     num * sign
   }
 
-  pub fn next_u8(&mut self)  -> u8  { self.next_usize() as u8  }
-  pub fn next_u16(&mut self) -> u16 { self.next_usize() as u16 }
-  pub fn next_u32(&mut self) -> u32 { self.next_usize() as u32 }
-  pub fn next_u64(&mut self) -> u64 { self.next_usize() as u64 }
-  pub fn next_i8(&mut self)  -> i8  { self.next_i64()   as i8  }
-  pub fn next_i16(&mut self) -> i16 { self.next_i64()   as i16 }
-  pub fn next_i32(&mut self) -> i32 { self.next_i64()   as i32 }
-  pub fn next_f32(&mut self) -> f32 { self.next_f64()   as f32 }
-
   pub fn has_more(&mut self) -> bool {
     if self.current_index >= self.bytes_read {
       self.bytes_read = self.reader.read(&mut self.buf[..]).unwrap();
@@ -110,8 +111,18 @@ impl<R: Read> InputReader<R> {
     self.buf.resize(buf_size, 0);
   }
 
-  // private methods
+  pub fn next_u8(&mut self)  -> u8  { self.next_usize() as u8  }
+  pub fn next_u16(&mut self) -> u16 { self.next_usize() as u16 }
+  pub fn next_u32(&mut self) -> u32 { self.next_usize() as u32 }
+  pub fn next_u64(&mut self) -> u64 { self.next_usize() as u64 }
+  pub fn next_i8(&mut self)  -> i8  { self.next_i64()   as i8  }
+  pub fn next_i16(&mut self) -> i16 { self.next_i64()   as i16 }
+  pub fn next_i32(&mut self) -> i32 { self.next_i64()   as i32 }
+  pub fn next_f32(&mut self) -> f32 { self.next_f64()   as f32 }
+}
 
+// private methods
+impl<R: Read> InputReader<R> {
   fn peek(&self) -> char { self.buf[self.current_index] as char }
 
   fn consume(&mut self) { self.current_index += 1; }
@@ -128,21 +139,13 @@ impl<R: Read> InputReader<R> {
   }
 
   fn consume_until_signed_num(&mut self) -> i64 {
-    let mut sign = 1;
     loop {
       self.consume_until(|c| c.is_ascii_digit() || c == '-');
+      if self.peek() != '-' { return 1; }
 
-      if self.peek() != '-' { break; }
       self.consume();
       self.assert_has_more();
-
-      // need to check that the char after
-      // '-' is actually a digit
-      if self.peek().is_ascii_digit() {
-        sign = -1;
-        break;
-      }
+      if self.peek().is_ascii_digit() { return -1; }
     }
-    sign
   }
 }
