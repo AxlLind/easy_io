@@ -74,12 +74,12 @@ impl<R: Read> InputReader<R> {
     c
   }
 
-  pub fn next_usize(&mut self) -> usize {
+  pub fn next_u64(&mut self) -> u64 {
     self.consume_until(|c| c.is_ascii_digit());
 
     let mut num = 0;
     while self.peek().is_ascii_digit() {
-      let digit = self.peek() as usize - '0' as usize;
+      let digit = self.peek() as u64 - '0' as u64;
       num = num * 10 + digit;
       self.consume();
       if !self.has_more() { break; }
@@ -89,7 +89,7 @@ impl<R: Read> InputReader<R> {
 
   pub fn next_i64(&mut self) -> i64 {
     let sign = self.consume_until_signed_num();
-    self.next_usize() as i64 * sign
+    self.next_u64() as i64 * sign
   }
 
   pub fn next_f64(&mut self) -> f64 {
@@ -111,14 +111,14 @@ impl<R: Read> InputReader<R> {
     self.buf.resize(buf_size, 0);
   }
 
-  pub fn next_u8(&mut self)  -> u8  { self.next_usize() as u8  }
-  pub fn next_u16(&mut self) -> u16 { self.next_usize() as u16 }
-  pub fn next_u32(&mut self) -> u32 { self.next_usize() as u32 }
-  pub fn next_u64(&mut self) -> u64 { self.next_usize() as u64 }
-  pub fn next_i8(&mut self)  -> i8  { self.next_i64()   as i8  }
-  pub fn next_i16(&mut self) -> i16 { self.next_i64()   as i16 }
-  pub fn next_i32(&mut self) -> i32 { self.next_i64()   as i32 }
-  pub fn next_f32(&mut self) -> f32 { self.next_f64()   as f32 }
+  pub fn next_f32(&mut self) -> f32 { self.next_f64() as f32 }
+  pub fn next_i8(&mut self)  -> i8  { self.next_i64() as i8  }
+  pub fn next_i16(&mut self) -> i16 { self.next_i64() as i16 }
+  pub fn next_i32(&mut self) -> i32 { self.next_i64() as i32 }
+  pub fn next_u8(&mut self)  -> u8  { self.next_u64() as u8  }
+  pub fn next_u16(&mut self) -> u16 { self.next_u64() as u16 }
+  pub fn next_u32(&mut self) -> u32 { self.next_u64() as u32 }
+  pub fn next_usize(&mut self) -> usize { self.next_u64() as usize }
 }
 
 // private methods
