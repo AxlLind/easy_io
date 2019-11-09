@@ -28,9 +28,9 @@ fn main() {
   let mut input = InputReader::from_reader(tcp_stream);
 
   // Read numbers and words from the input source simply like this.
-  let x: usize = input.next_usize();
-  let y: i64 = input.next_i64();
-  let z: f32 = input.next_f32();
+  let x = input.next_usize();
+  let y = input.next_i64();
+  let z = input.next_f32();
   let word: String = input.next_word().to_string();
   let line: String = input.next_line().to_string();
 }
@@ -99,6 +99,8 @@ InputReader::set_buf_size(&mut self, buf_size: usize)
 ```
 
 # OutputWriter
+This struct will simply buffer all output until the function `flush` is called which also happens automatically when the writer is dropped.
+
 ## Usage
 ```Rust
 // import it
@@ -117,8 +119,12 @@ fn main() -> std::io::Result<()> {
   let mut output = OutputWriter::from_writer(tcp_stream);
 
   // Write to the output source simply like this.
+  // These methods accept any object that implements Display.
   output.println("Hello world!");
-  output.print(&format!("{} is a cool number.\n", 1337));
+  output.prints(1337);
+  output.println("is a cool number.");
+  // or like this
+  output.print(format!("{} is a cool number.\n", 1337));
 
   // It also implements the Write trait, so you can do this:
   write!(output, "{} formatted!\n", "This is")?;
@@ -132,7 +138,7 @@ fn main() -> std::io::Result<()> {
 ```
 
 ## Public methods
-This class implements the `Write` trait. This is mostly so we can utilize the `write!` and `writeln!` macros but this means several more methods are available on the struct. See documentation [here](https://doc.rust-lang.org/std/io/trait.Write.html).
+This class implements the `Write` trait. This is so we can utilize the `write!` and `writeln!` macros for easy formatting. This means several more methods are available on the struct though. See documentation [here](https://doc.rust-lang.org/std/io/trait.Write.html).
 
 ### Constructors
 ```Rust
@@ -152,9 +158,12 @@ OutputWriter::from_writer(writer: W) -> Self
 
 ### Instance methods
 ```Rust
-// Writes the string to the output source.
-OutputWriter::print(&mut self, s: &str)
+// Writes something to the output source.
+OutputWriter::print<T: Display>(&mut self, t: T)
 
-// Convenience method for writing the given string with a newline appended.
-OutputWriter::println(&mut self, s: &str)
+// Convenience method for writing something with a space appended.
+OutputWriter::prints<T: Display>(&mut self, t: T)
+
+// Convenience method for writing something with a newline appended.
+OutputWriter::println<T: Display>(&mut self, t: T)
 ```

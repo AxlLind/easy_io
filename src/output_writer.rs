@@ -9,6 +9,7 @@
 #![allow(dead_code)]
 use std::io::{self, Write, Stdout, Result};
 use std::fs::{File, OpenOptions};
+use std::fmt::{Display};
 
 pub struct OutputWriter<W: Write> {
   writer: W,
@@ -35,13 +36,16 @@ impl<W: Write> OutputWriter<W> {
     Self { writer, buf }
   }
 
-  pub fn print(&mut self, s: &str) {
-    self.buf.extend(s.as_bytes());
+  pub fn print<T: Display>(&mut self, t: T) {
+    write!(self, "{}", t).unwrap();
   }
 
-  pub fn println(&mut self, s: &str) {
-    self.buf.extend(s.as_bytes());
-    self.buf.push(b'\n');
+  pub fn prints<T: Display>(&mut self, t: T) {
+    write!(self, "{} ", t).unwrap();
+  }
+
+  pub fn println<T: Display>(&mut self, t: T) {
+    writeln!(self, "{}", t).unwrap();
   }
 }
 
