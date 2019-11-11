@@ -132,9 +132,10 @@ impl<R: Read> InputReader<R> {
   }
 
   fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) {
-    while !test(self.peek()) {
-      self.consume();
+    loop {
       self.assert_has_more();
+      if test(self.peek()) { return; }
+      self.consume();
     }
   }
 
