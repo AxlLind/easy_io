@@ -79,9 +79,7 @@ impl<R: Read> InputReader<R> {
 
     let mut num = 0;
     while self.peek().is_ascii_digit() {
-      let digit = self.peek() as u64 - '0' as u64;
-      num = num * 10 + digit;
-      self.consume();
+      num = num * 10 + self.pop_digit();
       if !self.has_more() { break; }
     }
     num
@@ -94,8 +92,21 @@ impl<R: Read> InputReader<R> {
 
   pub fn next_f64(&mut self) -> f64 {
     let sign = self.consume_until_signed_num() as f64;
-    let num: f64 = self.next_word().parse().unwrap();
-    num * sign
+    let mut num = 0.0;
+    while self.peek().is_ascii_digit() {
+      num = num * 10.0 + self.pop_digit() as f64;
+      if !self.has_more() { break; }
+    }
+
+    if self.peek() != '.' { return num * sign; }
+    self.consume();
+
+    let mut factor = 1.0;
+    while self.has_more() && self.peek().is_ascii_digit() {
+      num = num * 10.0 + self.pop_digit() as f64;
+      factor *= 10.0;
+    }
+    sign * num / factor
   }
 
   pub fn has_more(&mut self) -> bool {
@@ -129,6 +140,12 @@ impl<R: Read> InputReader<R> {
 
   fn assert_has_more(&mut self) {
     assert!(self.has_more(), "InputReader: Reached end of input!");
+  }
+
+  fn pop_digit(&mut self) -> u64 {
+    let c = self.peek();
+    self.consume();
+    c as u64 - '0' as u64
   }
 
   fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) {
