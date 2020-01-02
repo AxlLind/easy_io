@@ -2,9 +2,9 @@
   A fast and dead-simple writer for competitive programming in Rust
 
   Author: Axel Lindeberg, github.com/AxlLind
-  Repository: https://github.com/AxlLind/EasyIO.rs
+  Repository: https://github.com/AxlLind/easy_io
   License: MIT
-  2019
+  2020
 */
 #![allow(dead_code)]
 use std::io::{self, Write, Stdout, Result};
