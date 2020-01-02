@@ -49,17 +49,13 @@ This struct sacrifices some functionality/correctness for performance and conven
 ## Public methods
 ### Constructors
 ```Rust
-// Constructs an InputReader which reads from stdin.
+// InputReader that reads from stdin.
 InputReader::new() -> Self
-```
 
-```Rust
-// Constructs an InputReader which reads from the file at the given path.
+// InputReader that reads from the file at the given path.
 InputReader::from_file(path: &str) -> Self
-```
 
-```Rust
-// Constructs an InputReader that reads from the given reader.
+// InputReader that reads from the given reader.
 InputReader::from_reader(reader: R) -> Self
 ```
 
@@ -105,7 +101,7 @@ use output_writer::OutputWriter;
 // ... or if via crates.io
 use easy_io::OutputWriter
 
-fn main() -> std::io::Result<()> {
+fn main() -> Result<()> {
   // Create a writer from stdout
   let mut output = OutputWriter::new();
 
@@ -131,7 +127,7 @@ fn main() -> std::io::Result<()> {
   // You can manually flush the writer. Note that this will
   // be done automatically when the writer is dropped.
   output.flush()?;
-  Ok()
+  Ok(())
 }
 ```
 
@@ -140,17 +136,13 @@ This class implements the `Write` trait. This is so we can utilize the `write!` 
 
 ### Constructors
 ```Rust
-// Constructs an OutputWriter which writes to stdout.
+// OutputWriter that writes to stdout.
 OutputWriter::new() -> Self
-```
 
-```Rust
-// Constructs an OutputWriter which writes to the file at the given path.
+// OutputWriter that writes to the file at the given path.
 OutputWriter::from_file(path: &str) -> Self
-```
 
-```Rust
-// Constructs an OutputWriter that writes to the given writer.
+// OutputWriter that writes to the given writer.
 OutputWriter::from_writer(writer: W) -> Self
 ```
 
