@@ -5,7 +5,7 @@ The main use of these structs is in competitive programming or [Kattis](https://
 
 Regular output in Rust via `println!()` can also be problematic since it is line buffered. This can make output can be surprisingly slow. The `OutputWriter` struct buffers all output until it is flushed/dropped which results in a significant performance improvement.
 
-To use these in competitive programming I would simply download [`input_reader.rs`](https://github.com/AxlLind/easy_io/blob/master/src/input_reader.rs) or [`output_reader.rs`](https://github.com/AxlLind/easy_io/blob/master/src/output_writer.rs). Put them in the same folder as your solution and import it like below.
+To use these in competitive programming I would simply download [`input_reader.rs`](https://github.com/AxlLind/easy_io/blob/master/src/input_reader.rs) and/or [`output_reader.rs`](https://github.com/AxlLind/easy_io/blob/master/src/output_writer.rs). Put them in the same folder as your solution and import it like below.
 
 This was inspired by [this amazing](https://github.com/williamfiset/FastJavaIO) Java class but written completely separately.
 
@@ -35,9 +35,6 @@ fn main() {
   let z = input.next::<f64>();
   let word: String = input.next();
   let line: String = input.next_line();
-
-  // 10 numbers from the input source into a Vec
-  let v = (0..10).map(|_| input.next::<i32>()).collect::<Vec<_>>();
 }
 ```
 
@@ -98,7 +95,7 @@ InputReader::set_buf_size(&mut self, buf_size: usize)
 ```
 
 # OutputWriter
-This struct will simply buffer all output until the function `flush` is called which also happens automatically when the writer is dropped.
+This struct will simply buffer all output until the until the writer is dropped (or the `flush` is called manually).
 
 ## Usage
 ```Rust
