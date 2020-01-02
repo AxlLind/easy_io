@@ -15,7 +15,6 @@ pub struct InputReader<R: Read> {
   buf: Vec<u8>,
   bytes_read: usize,
   current_index: usize,
-  str_buf: String,
 }
 
 impl InputReader<Stdin> {
@@ -37,76 +36,23 @@ impl<R: Read> InputReader<R> {
       buf: vec![0; 1 << 16],
       bytes_read: 0,
       current_index: 0,
-      str_buf: String::with_capacity(1 << 8),
     }
   }
 
-  pub fn next_word(&mut self) -> &str {
-    self.consume_until(|c| c.is_ascii_graphic());
-
-    self.str_buf.clear();
-    while self.peek().is_ascii_graphic() {
-      self.str_buf.push(self.peek());
-      self.consume();
-      if !self.has_more() { break; }
-    }
-    &self.str_buf
+  pub fn next<T: InputReadable>(&mut self) -> T {
+    T::from_input(self)
   }
 
-  pub fn next_line(&mut self) -> &str {
+  pub fn next_line(&mut self) -> String {
     self.assert_has_more();
-
-    self.str_buf.clear();
+    let mut line = String::new();
     while self.peek() != '\n' {
-      self.str_buf.push(self.peek());
+      line.push(self.peek());
       self.consume();
       if !self.has_more() { break; }
     }
-    self.consume(); // consume the newline
-    &self.str_buf
-  }
-
-  pub fn next_char(&mut self) -> char {
-    self.consume_until(|c| c.is_ascii_graphic());
-
-    let c = self.peek();
-    self.consume();
-    c
-  }
-
-  pub fn next_u64(&mut self) -> u64 {
-    self.consume_until(|c| c.is_ascii_digit());
-
-    let mut num = 0;
-    while self.peek().is_ascii_digit() {
-      num = num * 10 + self.pop_digit();
-      if !self.has_more() { break; }
-    }
-    num
-  }
-
-  pub fn next_i64(&mut self) -> i64 {
-    let sign = self.consume_until_signed_num();
-    self.next_u64() as i64 * sign
-  }
-
-  pub fn next_f64(&mut self) -> f64 {
-    let sign = self.consume_until_signed_num() as f64;
-    let mut num = 0.0;
-    while self.peek().is_ascii_digit() {
-      num = num * 10.0 + self.pop_digit() as f64;
-      if !self.has_more() { break; }
-    }
-
-    if self.peek() != '.' { return num * sign; }
-    self.consume();
-
-    let mut factor = 1.0;
-    while self.has_more() && self.peek().is_ascii_digit() {
-      num = num * 10.0 + self.pop_digit() as f64;
-      factor *= 10.0;
-    }
-    sign * num / factor
+    self.consume(); // consume newline
+    line
   }
 
   pub fn has_more(&mut self) -> bool {
@@ -118,18 +64,8 @@ impl<R: Read> InputReader<R> {
   }
 
   pub fn set_buf_size(&mut self, buf_size: usize) {
-    assert!(buf_size >= self.bytes_read, "InputReader: Data loss while shrinking buffer!");
     self.buf.resize(buf_size, 0);
   }
-
-  pub fn next_f32(&mut self) -> f32 { self.next_f64() as f32 }
-  pub fn next_i8(&mut self)  -> i8  { self.next_i64() as i8  }
-  pub fn next_i16(&mut self) -> i16 { self.next_i64() as i16 }
-  pub fn next_i32(&mut self) -> i32 { self.next_i64() as i32 }
-  pub fn next_u8(&mut self)  -> u8  { self.next_u64() as u8  }
-  pub fn next_u16(&mut self) -> u16 { self.next_u64() as u16 }
-  pub fn next_u32(&mut self) -> u32 { self.next_u64() as u32 }
-  pub fn next_usize(&mut self) -> usize { self.next_u64() as usize }
 }
 
 // private methods
@@ -156,7 +92,7 @@ impl<R: Read> InputReader<R> {
     }
   }
 
-  fn consume_until_signed_num(&mut self) -> i64 {
+  fn consume_until_sign(&mut self) -> i64 {
     loop {
       self.consume_until(|c| c.is_ascii_digit() || c == '-');
       if self.peek() != '-' { return 1; }
@@ -167,3 +103,86 @@ impl<R: Read> InputReader<R> {
     }
   }
 }
+
+pub trait InputReadable {
+  fn from_input<R: Read>(input: &mut InputReader<R>) -> Self;
+}
+
+impl InputReadable for u64 {
+  fn from_input<R: Read>(input: &mut InputReader<R>) -> Self {
+    input.consume_until(|c| c.is_ascii_digit());
+    let mut num = 0;
+    while input.peek().is_ascii_digit() {
+      num = num * 10 + input.pop_digit();
+      if !input.has_more() { break; }
+    }
+    num
+  }
+}
+
+impl InputReadable for i64 {
+  fn from_input<R: Read>(input: &mut InputReader<R>) -> Self {
+    let sign = input.consume_until_sign();
+    u64::from_input(input) as i64 * sign
+  }
+}
+
+impl InputReadable for f64 {
+  fn from_input<R: Read>(input: &mut InputReader<R>) -> Self {
+    let sign = input.consume_until_sign() as f64;
+    let mut num = 0.0;
+    while input.peek().is_ascii_digit() {
+      num = num * 10.0 + input.pop_digit() as f64;
+      if !input.has_more() { break; }
+    }
+
+    let mut factor = 1.0;
+    if input.peek() == '.' {
+      input.consume();
+      while input.has_more() && input.peek().is_ascii_digit() {
+        num = num * 10.0 + input.pop_digit() as f64;
+        factor *= 10.0;
+      }
+    }
+    sign * num / factor
+  }
+}
+
+impl InputReadable for String {
+  fn from_input<R: Read>(input: &mut InputReader<R>) -> Self {
+    input.consume_until(|c| c.is_ascii_graphic());
+    let mut word = String::new();
+    while input.peek().is_ascii_graphic() {
+      word.push(input.peek());
+      input.consume();
+      if !input.has_more() { break; }
+    }
+    word
+  }
+}
+
+impl InputReadable for char {
+  fn from_input<R: Read>(input: &mut InputReader<R>) -> Self {
+    input.consume_until(|c| c.is_ascii_graphic());
+    let c = input.peek();
+    input.consume();
+    c
+  }
+}
+
+macro_rules! impl_readable_from {
+  ($A:ty, [$T:ty]) => {
+    impl InputReadable for $T {
+      fn from_input<R: Read>(input: &mut InputReader<R>) -> Self {
+        <$A>::from_input(input) as $T
+      }
+    }
+  };
+  ($A:ty, [$T:ty, $($Ts:ty),+]) => {
+    impl_readable_from!{$A, [$T]}
+    impl_readable_from!{$A, [$($Ts),*]}
+  };
+}
+impl_readable_from!{ u64, [u8, u16, u32, usize] }
+impl_readable_from!{ i64, [i8, i16, i32, isize] }
+impl_readable_from!{ f64, [f32] }
