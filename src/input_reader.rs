@@ -183,6 +183,6 @@ macro_rules! impl_readable_from {
     impl_readable_from!{$A, [$($Ts),*]}
   };
 }
-impl_readable_from!{ u64, [u8, u16, u32, usize] }
-impl_readable_from!{ i64, [i8, i16, i32, isize] }
+impl_readable_from!{ u64, [u32, u16, u8, usize] }
+impl_readable_from!{ i64, [i32, i16, i8, isize] }
 impl_readable_from!{ f64, [f32] }
