@@ -10,6 +10,8 @@
 use std::io::{self, Read, Stdin};
 use std::fs::File;
 
+const EOF: &str = "InputReader: Reached end of input!";
+
 pub struct InputReader<R: Read> {
   reader: R,
   buf: Vec<u8>,
@@ -44,14 +46,14 @@ impl<R: Read> InputReader<R> {
   }
 
   pub fn next_line(&mut self) -> String {
-    self.assert_has_more();
+    assert!(self.has_more(), EOF);
     let mut line = String::new();
     while self.peek() != '\n' {
       line.push(self.peek());
       self.consume();
       if !self.has_more() { break; }
     }
-    self.consume(); // consume newline
+    self.consume(); // consume '\n'
     line
   }
 
@@ -66,17 +68,10 @@ impl<R: Read> InputReader<R> {
   pub fn set_buf_size(&mut self, buf_size: usize) {
     self.buf.resize(buf_size, 0);
   }
-}
 
-// private methods
-impl<R: Read> InputReader<R> {
   fn peek(&self) -> char { self.buf[self.current_index] as char }
 
   fn consume(&mut self) { self.current_index += 1; }
-
-  fn assert_has_more(&mut self) {
-    assert!(self.has_more(), "InputReader: Reached end of input!");
-  }
 
   fn pop_digit(&mut self) -> u64 {
     let c = self.peek();
@@ -86,7 +81,7 @@ impl<R: Read> InputReader<R> {
 
   fn consume_until<F: Fn(char) -> bool>(&mut self, test: F) {
     loop {
-      self.assert_has_more();
+      assert!(self.has_more(), EOF);
       if test(self.peek()) { return; }
       self.consume();
     }
@@ -98,7 +93,7 @@ impl<R: Read> InputReader<R> {
       if self.peek() != '-' { return 1; }
 
       self.consume();
-      self.assert_has_more();
+      assert!(self.has_more(), EOF);
       if self.peek().is_ascii_digit() { return -1; }
     }
   }
@@ -171,16 +166,12 @@ impl InputReadable for char {
 }
 
 macro_rules! impl_readable_from {
-  ($A:ty, [$T:ty]) => {
-    impl InputReadable for $T {
+  ($A:ty, [$($T:ty),+]) => {
+    $(impl InputReadable for $T {
       fn from_input<R: Read>(input: &mut InputReader<R>) -> Self {
         <$A>::from_input(input) as $T
       }
-    }
-  };
-  ($A:ty, [$T:ty, $($Ts:ty),+]) => {
-    impl_readable_from!{$A, [$T]}
-    impl_readable_from!{$A, [$($Ts),*]}
+    })+
   };
 }
 impl_readable_from!{ u64, [u32, u16, u8, usize] }
